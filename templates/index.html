@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Container Image Downloader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-8">
+    <div class="max-w-2xl mx-auto p-4">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h1 class="text-2xl font-bold mb-4">Container Image Downloader</h1>
+            <p class="text-gray-600 mb-4">Enter a Container image URL to download it as a compressed tarball</p>
+            
+            <form id="downloadForm" class="space-y-4">
+                <div class="flex gap-2">
+                    <input 
+                        type="text" 
+                        name="image_url" 
+                        placeholder="e.g., nginx:latest" 
+                        required
+                        class="flex-1 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                    <button 
+                        type="submit"
+                        class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
+                    >
+                        Download
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-8">
+                <h2 class="text-lg font-semibold mb-4">Download History</h2>
+                <div id="history" class="space-y-2">
+                    <!-- History items will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let downloadHistory = JSON.parse(localStorage.getItem('downloadHistory') || '[]');
+        
+        function updateHistoryDisplay() {
+            const historyContainer = document.getElementById('history');
+            historyContainer.innerHTML = downloadHistory.length === 0 
+                ? '<p class="text-gray-500">No downloads yet</p>'
+                : downloadHistory.map((item, index) => `
+                    <div class="flex items-center justify-between bg-gray-50 p-3 rounded">
+                        <div class="flex flex-col">
+                            <span class="text-gray-700">${item.image}</span>
+                            <span class="text-sm text-gray-500">Size: ${item.size}</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="text-sm text-gray-500">${item.date}</span>
+                            <button 
+                                onclick="downloadImage('${item.image}')" 
+                                class="text-blue-500 hover:text-blue-600 text-sm"
+                            >
+                                Download Again
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+        }
+
+        async function downloadImage(imageUrl) {
+            const button = document.querySelector('button[type="submit"]');
+            const originalText = button.textContent;
+            button.textContent = 'Downloading...';
+            button.disabled = true;
+
+            try {
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `image_url=${encodeURIComponent(imageUrl)}`
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.statusText}`);
+                }
+
+                const fileSize = response.headers.get('X-File-Size');
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${imageUrl.replace(/[/:\\]/g, '_')}.tar.gz`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+                const existingIndex = downloadHistory.findIndex(item => item.image === imageUrl);
+                const newEntry = {
+                    image: imageUrl,
+                    date: new Date().toLocaleString(),
+                    size: fileSize
+                };
+
+                if (existingIndex !== -1) {
+                    downloadHistory.splice(existingIndex, 1);
+                }
+                downloadHistory.unshift(newEntry);
+                downloadHistory = downloadHistory.slice(0, 10); // Keep only last 10 downloads
+                localStorage.setItem('downloadHistory', JSON.stringify(downloadHistory));
+                updateHistoryDisplay();
+            } catch (error) {
+                alert('Failed to download: ' + error.message);
+            } finally {
+                button.textContent = originalText;
+                button.disabled = false;
+            }
+        }
+
+        document.getElementById('downloadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const imageUrl = this.elements.image_url.value.trim();
+            if (imageUrl) {
+                await downloadImage(imageUrl);
+                this.elements.image_url.value = '';
+            }
+        });
+
+        updateHistoryDisplay();
+    </script>
+</body>
+</html>
