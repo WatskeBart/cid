@@ -1,6 +1,10 @@
 venv/
 __pycache__/
 logs/
+screenshots/
+static/src/
+.github/
+.dockerignore
 *.pyc
 *.pyo
 *.pyd
@@ -13,3 +17,4 @@ logs/
 Dockerfile
 README.md
 docker-compose.yml
+tailwind.config.js

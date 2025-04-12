@@ -1,12 +1,16 @@
 FROM python:3.12-alpine3.21
 
-RUN apk update && \
-    apk add --no-cache skopeo ca-certificates && \
-    rm -rf /var/cache/apk/*
+RUN <<EOF
+apk update
+apk add --no-cache skopeo ca-certificates
+rm -rf /var/cache/apk/*
+EOF
 
 WORKDIR /app
 
 COPY requirements.txt .
+
+ENV PYTHONDONTWRITEBYTECODE=1
 
 RUN apk add --no-cache --virtual .build-deps gcc musl-dev python3-dev && \
     pip install --no-cache-dir -r requirements.txt && \
@@ -14,8 +18,10 @@ RUN apk add --no-cache --virtual .build-deps gcc musl-dev python3-dev && \
 
 COPY . .
 
-RUN adduser -D appuser
-RUN chown -R appuser:appuser /app
+RUN adduser -D appuser && \
+    chown -R appuser:appuser /app && \
+    rm requirements.txt
+
 USER appuser
 
 ENV FLASK_APP=app.py
