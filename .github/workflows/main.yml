@@ -22,9 +22,3 @@ jobs:
         
         docker push $IMAGE_NAME:$VERSION
         docker push $IMAGE_NAME:latest
-
-    - name: Generate Release Notes
-      if: github.event_name == 'release'
-      uses: ./.github/actions/release-notes
-      with:
-        tag: ${{ github.event.release.tag_name }}
