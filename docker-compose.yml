@@ -1,0 +1,12 @@
+name: "cid"
+
+services:
+  app:
+    build: .
+    ports:
+      - "8008:8008"
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs

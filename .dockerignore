@@ -1,0 +1,15 @@
+venv/
+__pycache__/
+logs/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.git/
+.gitignore
+.env
+*.tar
+*.tar.gz
+Dockerfile
+README.md
+docker-compose.yml
