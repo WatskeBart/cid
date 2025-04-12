@@ -12,7 +12,7 @@ from logging.handlers import RotatingFileHandler
 
 app = Flask(__name__, static_folder='static')
 
-APP_VERSION = os.getenv('APP_VERSION', '1.0.0')
+APP_VERSION = os.getenv('APP_VERSION', '1.1.0')
 
 # Configure logging
 if os.environ.get('FLASK_ENV') == 'production':
