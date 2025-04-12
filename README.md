@@ -15,11 +15,16 @@ A lightweight web application for downloading, pushing, and batch processing con
 
 ## Screenshots
 
+<details>
+<summary>Click to view screenshots</summary>
+
 ![Light Mode](screenshots/cid_light.png)
 ![Dark Mode](screenshots/cid_dark.png)
 ![Download History](screenshots/cid_download_history.png)
 ![Push Images](screenshots/cid_image_push.png)
 ![Batch Operations](screenshots/cid_batch_push.png)
+
+</details>
 
 ## Requirements
 
