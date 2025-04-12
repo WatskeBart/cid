@@ -87,7 +87,7 @@ The application can be configured using environment variables:
 ### Pushing Images
 
 1. Enter the source image URL in the format `repository/image:tag` (e.g. `nginx:latest`)
-2. Specify the destination registry URL (e.g. `mylocalregistry:5000`)
+2. Specify the destination registry URL (e.g. `mylocalregistry:5000` or `ghcr.io/yourusername/reponame`)
 3. Provide authentication credentials if required
 4. Select TLS and policy options as needed
 5. Click "Push Image" to transfer the image
@@ -95,7 +95,7 @@ The application can be configured using environment variables:
 ### Batch Operations
 
 1. Enter multiple image URLs (one per line), in the format `repository/image:tag` (e.g. `nginx:latest`)
-2. Specify the destination registry URL (e.g. `mylocalregistry:5000`)
+2. Specify the destination registry URL (e.g. `mylocalregistry:5000` or `ghcr.io/yourusername/reponame`)
 3. Provide authentication credentials if required
 4. Select TLS and policy options as needed
 5. Click "Start Batch Push" to process all images
