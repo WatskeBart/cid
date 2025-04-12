@@ -7,39 +7,244 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen py-8">
-    <div class="max-w-2xl mx-auto p-4">
+    <div class="max-w-3xl mx-auto p-4">
         <div class="bg-white rounded-lg shadow p-6">
             <h1 class="text-2xl font-bold mb-4">Container Image Downloader</h1>
-            <p class="text-gray-600 mb-4">Enter a Container image URL to download it as a compressed tarball</p>
             
-            <form id="downloadForm" class="space-y-4">
-                <div class="flex gap-2">
-                    <input 
-                        type="text" 
-                        name="image_url" 
-                        placeholder="e.g., nginx:latest" 
-                        required
-                        class="flex-1 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                    <button 
-                        type="submit"
-                        class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
-                    >
-                        Download
-                    </button>
-                </div>
-            </form>
+            <!-- Tabs -->
+            <div class="border-b border-gray-200 mb-6">
+                <ul class="flex flex-wrap -mb-px">
+                    <li class="mr-2">
+                        <button class="tab-button inline-block py-2 px-4 border-b-2 border-blue-500 text-blue-500 active" 
+                                data-tab="download-tab">Download Images</button>
+                    </li>
+                    <li class="mr-2">
+                        <button class="tab-button inline-block py-2 px-4 border-b-2 border-transparent hover:border-gray-300" 
+                                data-tab="push-tab">Push Images</button>
+                    </li>
+                    <li class="mr-2">
+                        <button class="tab-button inline-block py-2 px-4 border-b-2 border-transparent hover:border-gray-300" 
+                                data-tab="batch-tab">Batch Operations</button>
+                    </li>
+                </ul>
+            </div>
 
-            <div class="mt-8">
-                <h2 class="text-lg font-semibold mb-4">Download History</h2>
-                <div id="history" class="space-y-2">
-                    <!-- History items will be added here -->
+            <!-- Download Tab Content -->
+            <div id="download-tab" class="tab-content">
+                <p class="text-gray-600 mb-4">Enter a Container image URL to download it as a compressed tarball</p>
+                
+                <form id="downloadForm" class="space-y-4">
+                    <div class="flex gap-2">
+                        <input 
+                            type="text" 
+                            name="image_url" 
+                            placeholder="e.g., nginx:latest" 
+                            required
+                            class="flex-1 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                        <button 
+                            type="submit"
+                            class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
+                        >
+                            Download
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-8">
+                    <h2 class="text-lg font-semibold mb-4">Download History</h2>
+                    <div id="history" class="space-y-2">
+                        <!-- History items will be added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Push Tab Content -->
+            <div id="push-tab" class="tab-content hidden">
+                <p class="text-gray-600 mb-4">Pull an image from the source registry and push it to a destination registry</p>
+                
+                <form id="pushForm" class="space-y-4">
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Source Image</label>
+                            <input 
+                                type="text" 
+                                name="image_url" 
+                                placeholder="e.g., nginx:latest" 
+                                required
+                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Destination Registry</label>
+                            <input 
+                                type="text" 
+                                name="dest_registry" 
+                                placeholder="e.g., registry.example.com" 
+                                required
+                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Username (Optional)</label>
+                                <input 
+                                    type="text" 
+                                    name="dest_username" 
+                                    placeholder="Registry username"
+                                    class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Password (Optional)</label>
+                                <input 
+                                    type="password" 
+                                    name="dest_password" 
+                                    placeholder="Registry password"
+                                    class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="insecure_policy" name="insecure_policy" class="h-4 w-4 text-blue-600">
+                                <label for="insecure_policy" class="ml-2 text-sm text-gray-700">Use insecure policy (skip signature verification)</label>
+                            </div>
+                            <div class="flex items-center mt-2">
+                                <input type="checkbox" id="skip_tls_verify" name="skip_tls_verify" class="h-4 w-4 text-blue-600">
+                                <label for="skip_tls_verify" class="ml-2 text-sm text-gray-700">Skip TLS verification (for HTTP registries)</label>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <button 
+                                type="submit"
+                                class="w-full px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
+                            >
+                                Push Image
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <div id="push-result" class="mt-6 hidden">
+                    <div class="bg-gray-50 p-4 rounded border">
+                        <h3 class="font-medium mb-2">Result:</h3>
+                        <div id="push-message" class="text-sm"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Batch Operations Tab Content -->
+            <div id="batch-tab" class="tab-content hidden">
+                <p class="text-gray-600 mb-4">Perform operations on multiple images at once</p>
+                
+                <form id="batchForm" class="space-y-4">
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Source Images (One per line)
+                            </label>
+                            <textarea 
+                                name="source_images" 
+                                rows="5"
+                                placeholder="nginx:latest&#10;redis:alpine&#10;postgres:13"
+                                required
+                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            ></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Destination Registry</label>
+                            <input 
+                                type="text" 
+                                name="dest_registry" 
+                                placeholder="e.g., registry.example.com" 
+                                required
+                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Username (Optional)</label>
+                                <input 
+                                    type="text" 
+                                    name="dest_username" 
+                                    placeholder="Registry username"
+                                    class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Password (Optional)</label>
+                                <input 
+                                    type="password" 
+                                    name="dest_password" 
+                                    placeholder="Registry password"
+                                    class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="batch_insecure_policy" name="insecure_policy" class="h-4 w-4 text-blue-600">
+                                <label for="batch_insecure_policy" class="ml-2 text-sm text-gray-700">Use insecure policy (skip signature verification)</label>
+                            </div>
+                            <div class="flex items-center mt-2">
+                                <input type="checkbox" id="batch_skip_tls_verify" name="skip_tls_verify" class="h-4 w-4 text-blue-600">
+                                <label for="batch_skip_tls_verify" class="ml-2 text-sm text-gray-700">Skip TLS verification (for HTTP registries)</label>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <button 
+                                type="submit"
+                                class="w-full px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
+                            >
+                                Start Batch Push
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <div id="batch-result" class="mt-6 hidden">
+                    <div class="bg-gray-50 p-4 rounded border">
+                        <h3 class="font-medium mb-2">Batch Results:</h3>
+                        <div id="batch-summary" class="text-sm mb-2"></div>
+                        <div id="batch-details" class="text-sm"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // Tab Switching
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+                
+                // Deactivate all buttons
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.classList.remove('border-blue-500', 'text-blue-500');
+                    btn.classList.add('border-transparent');
+                });
+                
+                // Show the selected tab and activate button
+                document.getElementById(button.dataset.tab).classList.remove('hidden');
+                button.classList.add('border-blue-500', 'text-blue-500');
+                button.classList.remove('border-transparent');
+            });
+        });
+        
+        // Download History
         let downloadHistory = JSON.parse(localStorage.getItem('downloadHistory') || '[]');
         
         function updateHistoryDisplay() {
@@ -54,19 +259,27 @@
                         </div>
                         <div class="flex items-center gap-4">
                             <span class="text-sm text-gray-500">${item.date}</span>
-                            <button 
-                                onclick="downloadImage('${item.image}')" 
-                                class="text-blue-500 hover:text-blue-600 text-sm"
-                            >
-                                Download Again
-                            </button>
+                            <div class="flex gap-2">
+                                <button 
+                                    onclick="downloadImage('${item.image}')" 
+                                    class="text-blue-500 hover:text-blue-600 text-sm"
+                                >
+                                    Download
+                                </button>
+                                <button 
+                                    onclick="prepareForPush('${item.image}')" 
+                                    class="text-green-500 hover:text-green-600 text-sm"
+                                >
+                                    Push
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `).join('');
         }
 
         async function downloadImage(imageUrl) {
-            const button = document.querySelector('button[type="submit"]');
+            const button = document.querySelector('#downloadForm button[type="submit"]');
             const originalText = button.textContent;
             button.textContent = 'Downloading...';
             button.disabled = true;
@@ -118,6 +331,162 @@
             }
         }
 
+        function prepareForPush(imageUrl) {
+            // Switch to push tab
+            document.querySelector('[data-tab="push-tab"]').click();
+            
+            // Fill in the source image
+            document.querySelector('#pushForm input[name="image_url"]').value = imageUrl;
+            
+            // Focus on destination registry field
+            document.querySelector('#pushForm input[name="dest_registry"]').focus();
+        }
+
+        async function pushImage(event) {
+            event.preventDefault();
+            
+            const form = document.getElementById('pushForm');
+            const button = form.querySelector('button[type="submit"]');
+            const originalText = button.textContent;
+            button.textContent = 'Pushing...';
+            button.disabled = true;
+            
+            const formData = new FormData(form);
+            formData.append('action', 'push'); // THIS IS THE FIX - Add action parameter here
+            
+            try {
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    body: new URLSearchParams(formData) // THIS IS THE FIX - Don't concatenate strings
+                });
+                
+                let result;
+                try {
+                    result = await response.json();
+                } catch (jsonError) {
+                    // Handle non-JSON responses
+                    const text = await response.text();
+                    result = { 
+                        status: "error", 
+                        message: `Server returned non-JSON response: ${text.substring(0, 100)}...` 
+                    };
+                }
+                
+                const resultDiv = document.getElementById('push-result');
+                const messageDiv = document.getElementById('push-message');
+                
+                resultDiv.classList.remove('hidden');
+                
+                if (response.ok) {
+                    resultDiv.classList.remove('bg-red-50');
+                    resultDiv.classList.add('bg-green-50');
+                    messageDiv.innerHTML = `
+                        <p class="text-green-600">✓ Success!</p>
+                        <p>${result.message}</p>
+                    `;
+                } else {
+                    resultDiv.classList.remove('bg-green-50');
+                    resultDiv.classList.add('bg-red-50');
+                    messageDiv.innerHTML = `
+                        <p class="text-red-600">❌ Error</p>
+                        <p>${result.message}</p>
+                    `;
+                }
+            } catch (error) {
+                const resultDiv = document.getElementById('push-result');
+                const messageDiv = document.getElementById('push-message');
+                
+                resultDiv.classList.remove('hidden', 'bg-green-50');
+                resultDiv.classList.add('bg-red-50');
+                messageDiv.innerHTML = `
+                    <p class="text-red-600">❌ Error</p>
+                    <p>Failed to push: ${error.message}</p>
+                `;
+            } finally {
+                button.textContent = originalText;
+                button.disabled = false;
+            }
+        }
+
+        async function batchPush(event) {
+            event.preventDefault();
+            
+            const form = document.getElementById('batchForm');
+            const button = form.querySelector('button[type="submit"]');
+            const originalText = button.textContent;
+            button.textContent = 'Processing...';
+            button.disabled = true;
+            
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch('/batch-push', {
+                    method: 'POST',
+                    body: new URLSearchParams(formData)
+                });
+                
+                let result;
+                try {
+                    result = await response.json();
+                } catch (jsonError) {
+                    // Handle non-JSON responses
+                    const text = await response.text();
+                    throw new Error(`Server returned non-JSON response: ${text.substring(0, 100)}...`);
+                }
+                
+                const resultDiv = document.getElementById('batch-result');
+                const summaryDiv = document.getElementById('batch-summary');
+                const detailsDiv = document.getElementById('batch-details');
+                
+                resultDiv.classList.remove('hidden');
+                
+                // Display summary
+                summaryDiv.innerHTML = `
+                    <div class="mb-1">
+                        <span class="font-medium">Total:</span> ${result.total} images
+                    </div>
+                    <div class="mb-1">
+                        <span class="font-medium text-green-600">Successful:</span> ${result.successful} images
+                    </div>
+                    <div>
+                        <span class="font-medium text-red-600">Failed:</span> ${result.failed} images
+                    </div>
+                `;
+                
+                // Display details
+                detailsDiv.innerHTML = `
+                    <div class="mt-3 border-t pt-3">
+                        <h4 class="font-medium mb-2">Details:</h4>
+                        <div class="space-y-2">
+                            ${result.batch_results.map(item => `
+                                <div class="p-2 ${item.status === 'success' ? 'bg-green-50' : 'bg-red-50'} rounded border">
+                                    <div class="font-medium ${item.status === 'success' ? 'text-green-600' : 'text-red-600'}">
+                                        ${item.status === 'success' ? '✓' : '❌'} ${item.image}
+                                    </div>
+                                    ${item.status === 'success' 
+                                        ? `<div class="text-sm mt-1">Pushed to: ${item.destination}</div>`
+                                        : `<div class="text-sm mt-1 text-red-500">${item.error}</div>`
+                                    }
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                const resultDiv = document.getElementById('batch-result');
+                const summaryDiv = document.getElementById('batch-summary');
+                const detailsDiv = document.getElementById('batch-details');
+                
+                resultDiv.classList.remove('hidden');
+                summaryDiv.innerHTML = `<p class="text-red-600">Failed to process batch operation</p>`;
+                detailsDiv.innerHTML = `<p>${error.message}</p>`;
+            } finally {
+                button.textContent = originalText;
+                button.disabled = false;
+            }
+        }
+
+        // Event Listeners
         document.getElementById('downloadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const imageUrl = this.elements.image_url.value.trim();
@@ -126,7 +495,11 @@
                 this.elements.image_url.value = '';
             }
         });
+        
+        document.getElementById('pushForm').addEventListener('submit', pushImage);
+        document.getElementById('batchForm').addEventListener('submit', batchPush);
 
+        // Initialize
         updateHistoryDisplay();
     </script>
 </body>
