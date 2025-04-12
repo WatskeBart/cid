@@ -1,0 +1,30 @@
+name: Build cid
+
+on:
+  workflow_dispatch:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/docker-login
+
+    - name: Build and Push
+      run: |
+        IMAGE_NAME=ghcr.io/watskebart/cid
+        VERSION=${{ github.event.release.tag_name }}
+        
+        docker build -f Dockerfile -t $IMAGE_NAME:$VERSION .
+        docker tag $IMAGE_NAME:$VERSION $IMAGE_NAME:latest
+        
+        docker push $IMAGE_NAME:$VERSION
+        docker push $IMAGE_NAME:latest
+
+    - name: Generate Release Notes
+      if: github.event_name == 'release'
+      uses: ./.github/actions/release-notes
+      with:
+        tag: ${{ github.event.release.tag_name }}

@@ -1,0 +1,7 @@
+name: 'Docker Login'
+description: Login to github registry
+runs:
+  using: 'composite'
+  steps:
+    - run: echo ${{ github.token }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      shell: bash
