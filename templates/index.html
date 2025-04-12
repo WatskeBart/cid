@@ -4,12 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Container Image Downloader</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
 </head>
-<body class="bg-gray-100 min-h-screen py-8">
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen py-8">
     <div class="max-w-3xl mx-auto p-4">
-        <div class="bg-white rounded-lg shadow p-6">
-            <h1 class="text-2xl font-bold mb-4">Container Image Downloader <span class="text-sm text-gray-500">v{{ version }}</span></h1>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 dark:text-white">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-2xl font-bold">Container Image Downloader <span class="text-sm text-gray-500">v{{ version }}</span></h1>
+                <div class="flex items-center">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" id="darkModeToggle" class="sr-only peer">
+                      <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:translate-x-[-100%] peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 overflow-hidden">
+                        <span class="absolute top-1/2 left-1.5 -translate-y-1/2 text-xs z-10 dark:opacity-0">☀️</span>
+                        <span class="absolute top-1/2 right-1.5 -translate-y-1/2 text-xs opacity-0 dark:opacity-100 z-10">⛅</span>
+                      </div>
+                    </label>
+                  </div>
+            </div>
             
             <!-- Tabs -->
             <div class="border-b border-gray-200 mb-6">
@@ -31,7 +47,7 @@
 
             <!-- Download Tab Content -->
             <div id="download-tab" class="tab-content">
-                <p class="text-gray-600 mb-4">Enter a Container image URL to download it as a compressed tarball</p>
+                <p class="text-gray-600 dark:text-gray-300 mb-4">Enter a Container image URL to download it as a compressed tarball</p>
                 
                 <form id="downloadForm" class="space-y-4">
                     <div class="flex gap-2">
@@ -40,7 +56,7 @@
                             name="image_url" 
                             placeholder="e.g., nginx:latest" 
                             required
-                            class="flex-1 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="flex-1 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         >
                         <button 
                             type="submit"
@@ -61,49 +77,49 @@
 
             <!-- Push Tab Content -->
             <div id="push-tab" class="tab-content hidden">
-                <p class="text-gray-600 mb-4">Pull an image from the source registry and push it to a destination registry</p>
+                <p class="text-gray-600 dark:text-gray-300 mb-4">Pull an image from the source registry and push it to a destination registry</p>
                 
                 <form id="pushForm" class="space-y-4">
                     <div class="grid grid-cols-1 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Source Image</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Source Image</label>
                             <input 
                                 type="text" 
                                 name="image_url" 
                                 placeholder="e.g., nginx:latest" 
                                 required
-                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                             >
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Destination Registry</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Destination Registry</label>
                             <input 
                                 type="text" 
                                 name="dest_registry" 
                                 placeholder="e.g., registry.example.com" 
                                 required
-                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                             >
                         </div>
                         
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Username (Optional)</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username (Optional)</label>
                                 <input 
                                     type="text" 
                                     name="dest_username" 
                                     placeholder="Registry username"
-                                    class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                 >
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Password or access token (Optional)</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password or access token (Optional)</label>
                                 <input 
                                     type="password" 
                                     name="dest_password" 
                                     placeholder="Registry password"
-                                    class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                 >
                             </div>
                         </div>
@@ -111,11 +127,11 @@
                         <div class="mt-4">
                             <div class="flex items-center">
                                 <input type="checkbox" id="insecure_policy" name="insecure_policy" class="h-4 w-4 text-blue-600">
-                                <label for="insecure_policy" class="ml-2 text-sm text-gray-700">Use insecure policy (skip signature verification)</label>
+                                <label for="insecure_policy" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Use insecure policy (skip signature verification)</label>
                             </div>
                             <div class="flex items-center mt-2">
                                 <input type="checkbox" id="skip_tls_verify" name="skip_tls_verify" class="h-4 w-4 text-blue-600">
-                                <label for="skip_tls_verify" class="ml-2 text-sm text-gray-700">Skip TLS verification (for HTTP registries)</label>
+                                <label for="skip_tls_verify" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Skip TLS verification (for HTTP registries)</label>
                             </div>
                         </div>
                         
@@ -140,12 +156,12 @@
 
             <!-- Batch Operations Tab Content -->
             <div id="batch-tab" class="tab-content hidden">
-                <p class="text-gray-600 mb-4">Perform operations on multiple images at once</p>
+                <p class="text-gray-600 dark:text-gray-300 mb-4">Perform operations on multiple images at once</p>
                 
                 <form id="batchForm" class="space-y-4">
                     <div class="grid grid-cols-1 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Source Images (One per line)
                             </label>
                             <textarea 
@@ -153,38 +169,38 @@
                                 rows="5"
                                 placeholder="nginx:latest&#10;redis:alpine&#10;postgres:13"
                                 required
-                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                             ></textarea>
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Destination Registry</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Destination Registry</label>
                             <input 
                                 type="text" 
                                 name="dest_registry" 
                                 placeholder="e.g., registry.example.com" 
                                 required
-                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                             >
                         </div>
                         
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Username (Optional)</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username (Optional)</label>
                                 <input 
                                     type="text" 
                                     name="dest_username" 
                                     placeholder="Registry username"
-                                    class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                 >
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Password or access token (Optional)</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password or access token (Optional)</label>
                                 <input 
                                     type="password" 
                                     name="dest_password" 
                                     placeholder="Registry password"
-                                    class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                 >
                             </div>
                         </div>
@@ -192,11 +208,11 @@
                         <div class="mt-4">
                             <div class="flex items-center">
                                 <input type="checkbox" id="batch_insecure_policy" name="insecure_policy" class="h-4 w-4 text-blue-600">
-                                <label for="batch_insecure_policy" class="ml-2 text-sm text-gray-700">Use insecure policy (skip signature verification)</label>
+                                <label for="batch_insecure_policy" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Use insecure policy (skip signature verification)</label>
                             </div>
                             <div class="flex items-center mt-2">
                                 <input type="checkbox" id="batch_skip_tls_verify" name="skip_tls_verify" class="h-4 w-4 text-blue-600">
-                                <label for="batch_skip_tls_verify" class="ml-2 text-sm text-gray-700">Skip TLS verification (for HTTP registries)</label>
+                                <label for="batch_skip_tls_verify" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Skip TLS verification (for HTTP registries)</label>
                             </div>
                         </div>
                         
@@ -247,36 +263,58 @@
         // Download History
         let downloadHistory = JSON.parse(localStorage.getItem('downloadHistory') || '[]');
         
-        function updateHistoryDisplay() {
+        function clearDownloadHistory() {
+            if (confirm("Are you sure you want to clear your download history?")) {
+              downloadHistory = [];
+              localStorage.removeItem('downloadHistory');
+              updateHistoryDisplay();
+            }
+          }
+          
+          function updateHistoryDisplay() {
             const historyContainer = document.getElementById('history');
-            historyContainer.innerHTML = downloadHistory.length === 0 
-                ? '<p class="text-gray-500">No downloads yet</p>'
-                : downloadHistory.map((item, index) => `
-                    <div class="flex items-center justify-between bg-gray-50 p-3 rounded">
-                        <div class="flex flex-col">
-                            <span class="text-gray-700">${item.image}</span>
-                            <span class="text-sm text-gray-500">Size: ${item.size}</span>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <span class="text-sm text-gray-500">${item.date}</span>
-                            <div class="flex gap-2">
-                                <button 
-                                    onclick="downloadImage('${item.image}')" 
-                                    class="text-blue-500 hover:text-blue-600 text-sm"
-                                >
-                                    Download
-                                </button>
-                                <button 
-                                    onclick="prepareForPush('${item.image}')" 
-                                    class="text-green-500 hover:text-green-600 text-sm"
-                                >
-                                    Push
-                                </button>
-                            </div>
-                        </div>
+            
+            if (downloadHistory.length === 0) {
+              historyContainer.innerHTML = '<p class="text-gray-500">No downloads yet</p>';
+            } else {
+              historyContainer.innerHTML = `
+                <div class="flex justify-between mb-2">
+                  <h2 class="text-lg font-semibold">Download History</h2>
+                  <button 
+                    onclick="clearDownloadHistory()" 
+                    class="text-red-500 hover:text-red-700 text-sm"
+                  >
+                    Clear History
+                  </button>
+                </div>
+                ${downloadHistory.map((item, index) => `
+                  <div class="flex items-center justify-between bg-gray-50 p-3 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <div class="flex flex-col">
+                      <span class="text-gray-700 dark:text-white">${item.image}</span>
+                      <span class="text-sm text-gray-500 dark:text-gray-300">Size: ${item.size}</span>
                     </div>
-                `).join('');
-        }
+                    <div class="flex items-center gap-4">
+                      <span class="text-sm text-gray-500 dark:text-gray-300">${item.date}</span>
+                      <div class="flex gap-2">
+                        <button 
+                          onclick="downloadImage('${item.image}')" 
+                          class="text-blue-500 hover:text-blue-600 text-sm"
+                        >
+                          Download
+                        </button>
+                        <button 
+                          onclick="prepareForPush('${item.image}')" 
+                          class="text-green-500 hover:text-green-600 text-sm"
+                        >
+                          Push
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              `;
+            }
+          }
 
         async function downloadImage(imageUrl) {
             const button = document.querySelector('#downloadForm button[type="submit"]');
@@ -501,6 +539,37 @@
 
         // Initialize
         updateHistoryDisplay();
+
+        // Dark mode toggle
+        function initDarkMode() {
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const html = document.documentElement;
+        
+        // Check for saved theme preference or use system preference
+        const isDarkMode = localStorage.getItem('darkMode') === 'true' || 
+            (localStorage.getItem('darkMode') === null && 
+            window.matchMedia('(prefers-color-scheme: dark)').matches);
+        
+        // Set initial state
+        if (isDarkMode) {
+            html.classList.add('dark');
+            darkModeToggle.checked = true;
+        }
+        
+        // Toggle dark mode
+        darkModeToggle.addEventListener('change', () => {
+            if (darkModeToggle.checked) {
+                html.classList.add('dark');
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                html.classList.remove('dark');
+                localStorage.setItem('darkMode', 'false');
+            }
+        });
+        }
+
+        // Call dark mode initialization
+        initDarkMode();
     </script>
 </body>
 </html>

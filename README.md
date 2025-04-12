@@ -3,6 +3,7 @@
 A lightweight web application for downloading, pushing, and batch processing container images across registries.
 
 ![License](https://img.shields.io/badge/license-BSD--3--Clause-blue)
+![Build](https://github.com/WatskeBart/cid/actions/workflows/main.yml/badge.svg)
 
 ## Features
 
@@ -14,7 +15,11 @@ A lightweight web application for downloading, pushing, and batch processing con
 
 ## Screenshots
 
-*[Screenshots would be added here]*
+![Light Mode](screenshots/cid_light.png)
+![Dark Mode](screenshots/cid_dark.png)
+![Download History](screenshots/cid_download_history.png)
+![Push Images](screenshots/cid_image_push.png)
+![Batch Operations](screenshots/cid_batch_push.png)
 
 ## Requirements
 
@@ -23,7 +28,7 @@ A lightweight web application for downloading, pushing, and batch processing con
 
 ## Quick Start
 
-### Using Docker (Recommended)
+### Using Docker compose (Recommended)
 
 ```bash
 git clone https://github.com/WatskeBart/cid.git
@@ -31,39 +36,76 @@ cd cid
 docker compose up -d
 ```
 
-Then access the application at http://localhost:8008
+#### Manual Docker run image
+
+Each release will have a pre-built image available in this repository.
+
+```bash
+docker run --name cid -p 8008:8008 -d ghcr.io/watskebart/cid:latest
+```
+
+>Access the application at http://localhost:8008
 
 ### Manual Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/WatskeBart/cid.git
 cd cid
 ```
 
 2. Create and activate a virtual environment:
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\bin\Activate.ps1
 ```
 
 3. Install dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
 4. Install Skopeo on your system:
+
    - Ubuntu/Debian: `apt-get install skopeo`
    - RHEL/CentOS: `dnf install skopeo`
    - Alpine: `apk add skopeo`
    - MacOS: `brew install skopeo`
+   - Windows: [winskopeo](https://github.com/passcod/winskopeo) (Not tested by me!)
 
 5. Start the application:
+
 ```bash
 python3 app.py
 ```
 
 The application will be available at http://localhost:8008
+
+### Rebuilding Tailwind CSS
+
+The application uses Tailwind CSS for styling. The build CSS ensures that this application also operates correctly without a internet connection.\
+To rebuild the CSS:
+
+1. Install the Tailwind CSS CLI globally:
+
+```bash
+npm install -g tailwindcss
+```
+
+>Alternatively, you can download a binary from the [Tailwind Github repository](https://github.com/tailwindlabs/tailwindcss/releases)
+
+2. Rebuild the CSS:
+
+```bash
+tailwindcss -i ./static/src/tailwind.css -o ./static/css/main.css # Development builds
+
+tailwindcss -i ./static/src/tailwind.css -o ./static/css/main.css --minify # Production builds
+
+tailwindcss -i ./static/src/tailwind.css -o ./static/css/main.css --watch # Development build with auto-reload on changes
+```
 
 ## Configuration
 
@@ -112,14 +154,20 @@ The application can be configured using environment variables:
 
 ### Project Structure
 
-```
+```markdown
 ├── app.py                # Main application logic
 ├── templates/            # HTML templates
 │   └── index.html        # Single-page web interface
+├── static/               # Static assets
+│   ├── css/              # Generated CSS
+│   │   └── main.css      # Compiled Tailwind CSS
+│   └── src/              # Source files
+│       └── tailwind.css  # Tailwind directives
 ├── logs/                 # Application logs (created at runtime)
 ├── docker-compose.yml    # Docker Compose configuration
 ├── Dockerfile            # Docker image definition
 ├── requirements.txt      # Python dependencies
+├── tailwind.config.js    # Tailwind CSS configuration
 └── README.md             # This file
 ```
 
