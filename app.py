@@ -12,6 +12,8 @@ from logging.handlers import RotatingFileHandler
 
 app = Flask(__name__)
 
+APP_VERSION = os.getenv('APP_VERSION', '1.0.0')
+
 # Configure logging
 if os.environ.get('FLASK_ENV') == 'production':
     # Set up proper production logging
@@ -44,7 +46,7 @@ def add_security_headers(response):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', version=APP_VERSION)
 
 @app.route('/download', methods=['POST'])
 def download_image():
