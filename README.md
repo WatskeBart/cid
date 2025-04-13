@@ -118,8 +118,7 @@ The application can be configured using environment variables:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `FLASK_ENV` | Local development `python3 app.py` | `debug` |
-| `FLASK_ENV` | Container image `docker compose up -d` | `production` |
+| `FLASK_ENV` | Production/Debug mode | `production` |
 | `HOST` | Host address to bind to | `0.0.0.0` |
 | `PORT` | Port number | `8008` |
 | `LOG_FILE` | Log to file (true of false) | `false` |

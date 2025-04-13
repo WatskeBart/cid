@@ -326,7 +326,7 @@ def health_check():
 
 if __name__ == '__main__':
     # In production, debug should be False
-    debug_mode = os.environ.get('FLASK_ENV', 'debug') != 'production'
+    debug_mode = os.environ.get('FLASK_ENV', 'production') != 'production'
     host = os.environ.get('HOST', '0.0.0.0')
     port = int(os.environ.get('PORT', 8008))
     app.run(host=host, port=port, debug=debug_mode)
