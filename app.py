@@ -16,7 +16,7 @@ from logging.handlers import RotatingFileHandler
 
 app = Flask(__name__, static_folder='static')
 
-APP_VERSION = os.getenv('APP_VERSION', '1.1.1')
+APP_VERSION = os.getenv('APP_VERSION', '1.2.0')
 
 # Rate error handler
 def rate_limit_exceeded_handler(request_limit):
