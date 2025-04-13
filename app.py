@@ -1,4 +1,8 @@
+
 from flask import Flask, render_template, request, send_file, jsonify
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from datetime import datetime
 import subprocess
 import tempfile
 import os
@@ -14,9 +18,26 @@ app = Flask(__name__, static_folder='static')
 
 APP_VERSION = os.getenv('APP_VERSION', '1.1.1')
 
+# Rate error handler
+def rate_limit_exceeded_handler(request_limit):
+    return jsonify({
+        "status": "error",
+        "message": "Rate limit exceeded. Please try again later.",
+        "retry_after": request_limit.reset_at - datetime.now().timestamp()
+    }), 429
+
+# Rate limiter
+limiter = Limiter(
+    get_remote_address, # Limit per IP-address
+    app=app,
+    default_limits=["400 per day", "100 per hour"],
+    storage_uri="memory://",
+    strategy="fixed-window",
+    on_breach=rate_limit_exceeded_handler,
+)
+
 # Configure logging
 if os.environ.get('FLASK_ENV') == 'production':
-    # Set up proper production logging
     if not os.path.exists('logs'):
         os.mkdir('logs')
     file_handler = RotatingFileHandler('logs/app.log', maxBytes=10240, backupCount=10)
@@ -28,7 +49,6 @@ if os.environ.get('FLASK_ENV') == 'production':
     app.logger.setLevel(logging.INFO)
     app.logger.info('Container Image Downloader startup')
 
-# Define size units
 def format_size(size_bytes):
     for unit in ['B', 'KB', 'MB', 'GB']:
         if size_bytes < 1024.0:
@@ -36,7 +56,6 @@ def format_size(size_bytes):
         size_bytes /= 1024.0
     return f"{size_bytes:.1f} GB"
 
-# Set some secure headers
 @app.after_request
 def add_security_headers(response):
     response.headers['X-Content-Type-Options'] = 'nosniff'
@@ -49,6 +68,7 @@ def index():
     return render_template('index.html', version=APP_VERSION)
 
 @app.route('/download', methods=['POST'])
+@limiter.limit("20/minute")
 def download_image():
     image_url = request.form.get('image_url')
     if not image_url:
@@ -125,18 +145,14 @@ def push_image(source_image_url):
                 "message": "Destination registry is required"
             }), 400
         
-        # Extract image name and tag to construct destination image URL
         image_parts = source_image_url.split('/')
         if len(image_parts) == 1:
-            # Simple image name like nginx:latest
             image_name = image_parts[0]
             dest_image_url = f"{dest_registry}/{image_name}"
         else:
-            # If source has organization/name format, preserve it
             image_name = '/'.join(image_parts[1:])
             dest_image_url = f"{dest_registry}/{image_name}"
         
-        # Build the command with optional flags
         cmd = ["skopeo", "copy"]
         
         if insecure_policy:
@@ -145,20 +161,18 @@ def push_image(source_image_url):
         if skip_tls_verify:
             cmd.append("--dest-tls-verify=false")
         
-        # Add credentials if provided
         if dest_username and dest_password:
             cmd.extend([
                 "--dest-creds", 
                 f"{dest_username}:{dest_password}"
             ])
         
-        # Add source and destination
         cmd.extend([
             f"docker://{source_image_url}",
             f"docker://{dest_image_url}"
         ])
         
-        # Log the command (with password redacted for security)
+        # Redact password from logging
         log_cmd = cmd.copy()
         if dest_username and dest_password:
             creds_index = log_cmd.index("--dest-creds") + 1
@@ -193,7 +207,7 @@ def push_image(source_image_url):
         }), 500
 
 @app.route('/batch-push', methods=['POST'])
-@app.route('/batch-push', methods=['POST'])
+@limiter.limit("20/minute")
 def batch_push():
     """Process multiple images in a batch operation"""
     source_images = request.form.get('source_images', '')
@@ -222,7 +236,6 @@ def batch_push():
                 
             dest_image_url = f"{dest_registry}/{image_name}"
             
-            # Build command with optional flags
             cmd = ["skopeo", "copy"]
             
             if insecure_policy:
@@ -270,6 +283,7 @@ def batch_push():
     })
 
 @app.route('/health')
+@limiter.exempt
 def health_check():
     """Healthcheck endpoint for container orchestrators"""
     return jsonify({"status": "healthy"})
