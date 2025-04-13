@@ -73,7 +73,17 @@
                         <!-- History items will be added here -->
                     </div>
                 </div>
+
+                <div id="download-result" class="mt-6 hidden">
+                    <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded border dark:border-gray-600">
+                        <h3 class="font-medium mb-2 dark:text-white">Result:</h3>
+                        <div id="download-message" class="text-sm"></div>
+                    </div>
+                </div>
+
             </div>
+
+
 
             <!-- Push Tab Content -->
             <div id="push-tab" class="tab-content hidden">
@@ -316,12 +326,15 @@
             }
           }
 
-        async function downloadImage(imageUrl) {
+          async function downloadImage(imageUrl) {
             const button = document.querySelector('#downloadForm button[type="submit"]');
             const originalText = button.textContent;
             button.textContent = 'Downloading...';
             button.disabled = true;
-
+            
+            const resultDiv = document.getElementById('download-result');
+            const messageDiv = document.getElementById('download-message');
+            
             try {
                 const response = await fetch('/download', {
                     method: 'POST',
@@ -330,13 +343,38 @@
                     },
                     body: `image_url=${encodeURIComponent(imageUrl)}`
                 });
-
-                if (!response.ok) {
-                    throw new Error(`Error: ${response.statusText}`);
+        
+                if (response.status === 429) {
+                    const retryAfter = response.headers.get('X-Retry-After');
+                    let message = "Rate limit exceeded. Please try again later.";
+                    
+                    if (retryAfter) {
+                        message += ` Try again in ${retryAfter} seconds.`;
+                    }
+                    
+                    throw new Error(message);
                 }
-
+        
+                if (!response.ok) {
+                    let errorMessage = `Error: ${response.statusText}`;
+                    
+                    try {
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('application/json')) {
+                            const errorData = await response.json();
+                            if (errorData.message) {
+                                errorMessage = errorData.message;
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Failed to parse error response:", e);
+                    }
+                    
+                    throw new Error(errorMessage);
+                }
+        
+                // Process successful download
                 const fileSize = response.headers.get('X-File-Size');
-
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -346,14 +384,15 @@
                 a.click();
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
-
+        
+                // Update history
                 const existingIndex = downloadHistory.findIndex(item => item.image === imageUrl);
                 const newEntry = {
                     image: imageUrl,
                     date: new Date().toLocaleString(),
                     size: fileSize
                 };
-
+        
                 if (existingIndex !== -1) {
                     downloadHistory.splice(existingIndex, 1);
                 }
@@ -361,8 +400,23 @@
                 downloadHistory = downloadHistory.slice(0, 10); // Keep only last 10 downloads
                 localStorage.setItem('downloadHistory', JSON.stringify(downloadHistory));
                 updateHistoryDisplay();
+                
+                // Show success message
+                resultDiv.classList.remove('hidden');
+                resultDiv.classList.remove('bg-red-50', 'dark:bg-red-900');
+                resultDiv.classList.add('bg-green-50', 'dark:bg-green-900');
+                messageDiv.innerHTML = `
+                    <p class="text-green-600 dark:text-green-400">✓ Success!</p>
+                    <p class="dark:text-white">Successfully downloaded ${imageUrl}</p>
+                `;
             } catch (error) {
-                alert('Failed to download: ' + error.message);
+                // Show error message in the result area
+                resultDiv.classList.remove('hidden', 'bg-green-50', 'dark:bg-green-900');
+                resultDiv.classList.add('bg-red-50', 'dark:bg-red-900');
+                messageDiv.innerHTML = `
+                    <p class="text-red-600 dark:text-red-400">❌ Error</p>
+                    <p class="dark:text-white">Failed to download: ${error.message}</p>
+                `;
             } finally {
                 button.textContent = originalText;
                 button.disabled = false;

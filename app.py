@@ -20,11 +20,22 @@ APP_VERSION = os.getenv('APP_VERSION', '1.1.1')
 
 # Rate error handler
 def rate_limit_exceeded_handler(request_limit):
-    return jsonify({
+    app.logger.info(f"Rate limit exceeded: {request.remote_addr} - {request.path} - {request_limit.limit}")
+    resp = jsonify({
         "status": "error",
-        "message": "Rate limit exceeded. Please try again later.",
+        "message": f"Rate limit exceeded. Please try again later. Current limit is: {request_limit.limit}",
         "retry_after": request_limit.reset_at - datetime.now().timestamp()
-    }), 429
+    })
+    
+    resp.status_code = 429
+    
+    # Add custom headers
+    resp.headers['X-Error-Type'] = 'rate_limit_exceeded'
+    resp.headers['X-Retry-After'] = str(int(request_limit.reset_at - datetime.now().timestamp()))
+    resp.headers['X-Rate-Limit'] = request_limit.limit
+    resp.headers['Access-Control-Expose-Headers'] = 'X-Error-Type, X-Retry-After, X-Rate-Limit'
+    
+    return resp
 
 # Rate limiter
 limiter = Limiter(
@@ -68,7 +79,7 @@ def index():
     return render_template('index.html', version=APP_VERSION)
 
 @app.route('/download', methods=['POST'])
-@limiter.limit("20/minute")
+@limiter.limit("1/minute")
 def download_image():
     image_url = request.form.get('image_url')
     if not image_url:
