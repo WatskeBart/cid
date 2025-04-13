@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Container Image Downloader</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <script>
-        tailwind.config = {
-            darkMode: 'class'
-        }
-    </script>
+    <script>tailwind.config = {darkMode: 'class'}</script>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 min-h-screen py-8">
     <div class="max-w-3xl mx-auto p-4">
@@ -250,18 +246,15 @@
         // Tab Switching
         document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', () => {
-                // Hide all tab contents
                 document.querySelectorAll('.tab-content').forEach(content => {
                     content.classList.add('hidden');
                 });
                 
-                // Deactivate all buttons
                 document.querySelectorAll('.tab-button').forEach(btn => {
                     btn.classList.remove('border-blue-500', 'text-blue-500');
                     btn.classList.add('border-transparent');
                 });
                 
-                // Show the selected tab and activate button
                 document.getElementById(button.dataset.tab).classList.remove('hidden');
                 button.classList.add('border-blue-500', 'text-blue-500');
                 button.classList.remove('border-transparent');
@@ -395,7 +388,6 @@
                     <p class="dark:text-white">Successfully downloaded ${imageUrl}</p>
                 `;
             } catch (error) {
-                // Show error message in the result area
                 resultDiv.classList.remove('hidden', 'bg-green-50', 'dark:bg-green-900');
                 resultDiv.classList.add('bg-red-50', 'dark:bg-red-900');
                 messageDiv.innerHTML = `
@@ -514,35 +506,35 @@
                 
                 // Display summary
                 summaryDiv.innerHTML = `
-                    <div class="mb-1">
-                        <span class="font-medium">Total:</span> ${result.total} images
-                    </div>
-                    <div class="mb-1">
-                        <span class="font-medium text-green-600">Successful:</span> ${result.successful} images
-                    </div>
-                    <div>
-                        <span class="font-medium text-red-600">Failed:</span> ${result.failed} images
-                    </div>
+                <div class="mb-1">
+                    <span class="font-medium">Total:</span> ${result.total} images
+                </div>
+                <div class="mb-1">
+                    <span class="font-medium text-green-600">Successful:</span> ${result.successful} images
+                </div>
+                <div>
+                    <span class="font-medium text-red-600">Failed:</span> ${result.failed} images
+                </div>
                 `;
                 
                 // Display details
                 detailsDiv.innerHTML = `
-                    <div class="mt-3 border-t pt-3 dark:border-gray-600">
-    <h4 class="font-medium mb-2 dark:text-white">Details:</h4>
-    <div class="space-y-2">
-        ${result.batch_results.map(item => `
-            <div class="p-2 ${item.status === 'success' ? 'bg-green-50 dark:bg-green-900' : 'bg-red-50 dark:bg-red-900'} rounded border dark:border-gray-600">
-                <div class="font-medium ${item.status === 'success' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">
-                    ${item.status === 'success' ? '✓' : '❌'} ${item.image}
+                <div class="mt-3 border-t pt-3 dark:border-gray-600">
+                <h4 class="font-medium mb-2 dark:text-white">Details:</h4>
+                    <div class="space-y-2">
+                        ${result.batch_results.map(item => `
+                            <div class="p-2 ${item.status === 'success' ? 'bg-green-50 dark:bg-green-900' : 'bg-red-50 dark:bg-red-900'} rounded border dark:border-gray-600">
+                                <div class="font-medium ${item.status === 'success' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">
+                                    ${item.status === 'success' ? '✓' : '❌'} ${item.image}
+                                </div>
+                                ${item.status === 'success' 
+                                    ? `<div class="text-sm mt-1 dark:text-gray-300">Pushed to: ${item.destination}</div>`
+                                    : `<div class="text-sm mt-1 text-red-500 dark:text-red-400">${item.error}</div>`
+                                }
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
-                ${item.status === 'success' 
-                    ? `<div class="text-sm mt-1 dark:text-gray-300">Pushed to: ${item.destination}</div>`
-                    : `<div class="text-sm mt-1 text-red-500 dark:text-red-400">${item.error}</div>`
-                }
-            </div>
-        `).join('')}
-    </div>
-</div>
                 `;
             } catch (error) {
                 const resultDiv = document.getElementById('batch-result');
@@ -571,26 +563,21 @@
         document.getElementById('pushForm').addEventListener('submit', pushImage);
         document.getElementById('batchForm').addEventListener('submit', batchPush);
 
-        // Initialize
         updateHistoryDisplay();
 
-        // Dark mode toggle
         function initDarkMode() {
         const darkModeToggle = document.getElementById('darkModeToggle');
         const html = document.documentElement;
         
-        // Check for saved theme preference or use system preference
         const isDarkMode = localStorage.getItem('darkMode') === 'true' || 
             (localStorage.getItem('darkMode') === null && 
             window.matchMedia('(prefers-color-scheme: dark)').matches);
-        
-        // Set initial state
+
         if (isDarkMode) {
             html.classList.add('dark');
             darkModeToggle.checked = true;
         }
-        
-        // Toggle dark mode
+
         darkModeToggle.addEventListener('change', () => {
             if (darkModeToggle.checked) {
                 html.classList.add('dark');

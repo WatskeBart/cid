@@ -51,14 +51,30 @@ limiter = Limiter(
 if os.environ.get('FLASK_ENV') == 'production':
     if not os.path.exists('logs'):
         os.mkdir('logs')
-    file_handler = RotatingFileHandler('logs/app.log', maxBytes=10240, backupCount=10)
-    file_handler.setFormatter(logging.Formatter(
+    
+    log_to_file = os.environ.get('LOG_FILE', 'false').lower() == 'true'
+    
+    if log_to_file:
+        file_handler = RotatingFileHandler('logs/app.log', maxBytes=10240, backupCount=10)
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+        ))
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+    
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(logging.Formatter(
         '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
     ))
-    file_handler.setLevel(logging.INFO)
-    app.logger.addHandler(file_handler)
+    console_handler.setLevel(logging.INFO)
+    app.logger.addHandler(console_handler)
+    
     app.logger.setLevel(logging.INFO)
     app.logger.info('Container Image Downloader started')
+    if log_to_file:
+        app.logger.info('File logging enabled')
+    else:
+        app.logger.info('File logging disabled')
 
 def format_size(size_bytes):
     for unit in ['B', 'KB', 'MB', 'GB']:
@@ -76,6 +92,7 @@ def add_security_headers(response):
 
 @app.route('/')
 def index():
+    app.logger.info(f"Page access from: {request.remote_addr}")
     return render_template('index.html', version=APP_VERSION)
 
 @app.route('/download', methods=['POST'])
@@ -83,12 +100,14 @@ def index():
 def download_image():
     image_url = request.form.get('image_url')
     if not image_url:
+        app.logger.info(f"Download attempt with empty image URL: {request.remote_addr}")
         return jsonify({
             "status": "error",
             "message": "Image URL is required"
         }), 400
     
     action = request.form.get('action', 'download')
+    app.logger.info(f"Processing {action} request for image: {image_url} from {request.remote_addr}")
     
     if action == 'push':
         return push_image(image_url)
@@ -128,6 +147,7 @@ def download_image():
                 mimetype='application/gzip'
             )
             response.headers['X-File-Size'] = formatted_size
+            app.logger.info(f"Download completed: {image_url} ({formatted_size})")
             return response
             
         except subprocess.CalledProcessError as e:
@@ -227,6 +247,8 @@ def batch_push():
     dest_password = request.form.get('dest_password')
     insecure_policy = request.form.get('insecure_policy') == 'on'
     skip_tls_verify = request.form.get('skip_tls_verify') == 'on'
+
+    app.logger.info(f"Batch push request from {request.remote_addr} to {dest_registry}")
     
     if not source_images or not dest_registry:
         return jsonify({
@@ -285,6 +307,8 @@ def batch_push():
                 "status": "error",
                 "error": str(e)
             })
+
+    app.logger.info(f"Batch push completed: {len(image_list)} images, {sum(1 for r in results if r['status'] == 'success')} successful, {sum(1 for r in results if r['status'] == 'error')} failed")
     
     return jsonify({
         "batch_results": results,
@@ -292,6 +316,7 @@ def batch_push():
         "successful": sum(1 for r in results if r["status"] == "success"),
         "failed": sum(1 for r in results if r["status"] == "error")
     })
+    
 
 @app.route('/health')
 @limiter.exempt
