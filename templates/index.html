@@ -47,7 +47,7 @@
 
             <!-- Download Tab Content -->
             <div id="download-tab" class="tab-content">
-                <p class="text-gray-600 dark:text-gray-300 mb-4">Enter a Container image URL to download it as a compressed tarball</p>
+                <p class="text-gray-600 dark:text-gray-300 mb-4">Enter a Container image URL to download it as a compressed tarball (.tgz)</p>
                 
                 <form id="downloadForm" class="space-y-4">
                     <div class="flex gap-2">
@@ -82,8 +82,6 @@
                 </div>
 
             </div>
-
-
 
             <!-- Push Tab Content -->
             <div id="push-tab" class="tab-content hidden">
@@ -278,6 +276,8 @@
               downloadHistory = [];
               localStorage.removeItem('downloadHistory');
               updateHistoryDisplay();
+              document.getElementById('download-result').classList.add('hidden');
+              document.getElementById('image_url').value = '';
             }
           }
           
@@ -290,37 +290,22 @@
               historyContainer.innerHTML = `
                 <div class="flex justify-between mb-2">
                   <h2 class="text-lg font-semibold"></h2>
-                  <button 
-                    onclick="clearDownloadHistory()" 
-                    class="text-red-500 hover:text-red-700 text-sm"
-                  >
-                    Clear History
-                  </button>
+                  <button onclick="clearDownloadHistory()" class="text-red-500 hover:text-red-700 text-sm">Clear History</button>
                 </div>
                 ${downloadHistory.map((item, index) => `
-                  <div class="flex items-center justify-between bg-gray-50 p-3 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    <div class="flex flex-col">
-                      <span class="text-gray-700 dark:text-white">${item.image}</span>
-                      <span class="text-sm text-gray-500 dark:text-gray-300">Size: ${item.size}</span>
+                    <div class="flex items-center justify-between bg-gray-50 p-3 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <div class="flex flex-col">
+                            <span class="text-gray-700 dark:text-white">${item.image}</span>
+                            <span class="text-sm text-gray-500 dark:text-gray-300">Size: ${item.size}</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="text-sm text-gray-500 dark:text-gray-300">${item.date}</span>
+                            <div class="flex gap-2">
+                            <button onclick="downloadImage('${item.image}')" class="text-blue-500 hover:text-blue-600 text-sm">Download</button>
+                            <button onclick="prepareForPush('${item.image}')" class="text-green-500 hover:text-green-600 text-sm">Push</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-4">
-                      <span class="text-sm text-gray-500 dark:text-gray-300">${item.date}</span>
-                      <div class="flex gap-2">
-                        <button 
-                          onclick="downloadImage('${item.image}')" 
-                          class="text-blue-500 hover:text-blue-600 text-sm"
-                        >
-                          Download
-                        </button>
-                        <button 
-                          onclick="prepareForPush('${item.image}')" 
-                          class="text-green-500 hover:text-green-600 text-sm"
-                        >
-                          Push
-                        </button>
-                      </div>
-                    </div>
-                  </div>
                 `).join('')}
               `;
             }
@@ -379,7 +364,7 @@
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `${imageUrl.replace(/[/:\\]/g, '_')}.tar.gz`;
+                a.download = `${imageUrl.replace(/[/:\\]/g, '_')}.tgz`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);

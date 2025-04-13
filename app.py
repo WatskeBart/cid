@@ -58,7 +58,7 @@ if os.environ.get('FLASK_ENV') == 'production':
     file_handler.setLevel(logging.INFO)
     app.logger.addHandler(file_handler)
     app.logger.setLevel(logging.INFO)
-    app.logger.info('Container Image Downloader startup')
+    app.logger.info('Container Image Downloader started')
 
 def format_size(size_bytes):
     for unit in ['B', 'KB', 'MB', 'GB']:
@@ -79,7 +79,7 @@ def index():
     return render_template('index.html', version=APP_VERSION)
 
 @app.route('/download', methods=['POST'])
-@limiter.limit("1/minute")
+@limiter.limit("10/minute")
 def download_image():
     image_url = request.form.get('image_url')
     if not image_url:
@@ -96,7 +96,7 @@ def download_image():
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir)
         tar_file = temp_dir_path / "image.tar"
-        gz_file = temp_dir_path / "image.tar.gz"
+        gz_file = temp_dir_path / "image.tgz"
         
         try:
             cmd = [
@@ -124,7 +124,7 @@ def download_image():
             response = send_file(
                 gz_file,
                 as_attachment=True,
-                download_name=f"{image_url.replace('/', '_')}.tar.gz",
+                download_name=f"{image_url.replace('/', '_')}.tgz",
                 mimetype='application/gzip'
             )
             response.headers['X-File-Size'] = formatted_size
