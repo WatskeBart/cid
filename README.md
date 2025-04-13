@@ -122,6 +122,7 @@ The application can be configured using environment variables:
 | `FLASK_ENV` | Container image `docker compose up -d` | `production` |
 | `HOST` | Host address to bind to | `0.0.0.0` |
 | `PORT` | Port number | `8008` |
+| `GUNICORN_CMD_ARGS` | Gunicorn override command | `--worker-class=gthread --workers=4 --threads=1 --timeout=120 --bind=0.0.0.0:8008` |
 
 ## Usage Guide
 

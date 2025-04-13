@@ -1,10 +1,8 @@
 FROM python:3.12-alpine3.21
 
-RUN <<EOF
-apk update
-apk add --no-cache skopeo ca-certificates
-rm -rf /var/cache/apk/*
-EOF
+RUN apk update && \
+    apk add --no-cache skopeo ca-certificates && \
+    rm -rf /var/cache/apk/*
 
 WORKDIR /app
 
