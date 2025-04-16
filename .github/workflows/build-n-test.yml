@@ -1,0 +1,23 @@
+name: Docker Build and Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Build Docker image
+      run: docker build -t cid-app .
+    
+    - name: Run container and check health
+      run: |
+        docker run -d --name test-container cid-app
+        sleep 10
+        docker ps | grep test-container
+        docker exec test-container wget -q -O- http://localhost:8008/health
