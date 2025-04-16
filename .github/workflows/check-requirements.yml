@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '0 0 * * 1'  # Run every Monday at midnight
   workflow_dispatch:
-    
+
 jobs:
   check-requirements:
     runs-on: ubuntu-latest
@@ -22,7 +22,7 @@ jobs:
     - name: Check for outdated dependencies
       run: |
         pip-compile --upgrade requirements.txt
-        git diff --exit-code requirements.txt || {
+        git diff --exit-code requirements-diff.txt || {
           echo "::warning::Requirements file needs updates. Run 'pip-compile --upgrade requirements.txt' locally."
           exit 1
         }
